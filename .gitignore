@@ -1,7 +1,7 @@
 # Local .terraform directories
 **/.terraform/*
 
-# .tfstate files (이 파일들은 나중에 S3 같은 원격 저장소에 따로 관리해야 합니다)
+# .tfstate files (이 파일들은 나중에 S3 같은 원격 저장소에 따로 관리)
 *.tfstate
 *.tfstate.*
 
