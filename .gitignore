@@ -1,0 +1,17 @@
+# Local .terraform directories
+**/.terraform/*
+
+# .tfstate files (이 파일들은 나중에 S3 같은 원격 저장소에 따로 관리해야 합니다)
+*.tfstate
+*.tfstate.*
+
+# Crash log files
+crash.log
+crash.*.log
+
+# Exclude sensitive variables
+*.tfvars
+*.tfvars.json
+
+# Exclude provider credentials
+.terraform.lock.hcl
