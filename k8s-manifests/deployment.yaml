@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: status-checker-deployment
+  labels:
+    app: status-checker
+spec:
+  replicas: 2 
+  selector:
+    matchLabels:
+      app: status-checker
+  template:
+    metadata:
+      labels:
+        app: status-checker
+    spec:
+      containers:
+      - name: status-checker
+        image: 808985145578.dkr.ecr.ap-northeast-2.amazonaws.com/status-checker-app:v1
+        ports:
+        ports:
+        - containerPort: 8000 # 파이썬 앱(FastAPI)이 사용하는 포트
