@@ -5,7 +5,7 @@ data "http" "myip" {
 resource "aws_eks_cluster" "main" {
   name     = "${var.project_name}-cluster"
   role_arn = aws_iam_role.cluster_role.arn
-  version  = "1.31" # Kubernetes version
+  version  = "1.32" # Kubernetes version 1.31은 표준 지원 종료여서 1.32로 변경
 
   vpc_config {
     # 실무에서는 보안을 위해 Private Subnet에만 클러스터 엔트포트에만 배치
