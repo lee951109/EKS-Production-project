@@ -15,3 +15,6 @@ crash.*.log
 
 # Exclude provider credentials
 .terraform.lock.hcl
+
+# Jenkins/K8s 관련
+*.log

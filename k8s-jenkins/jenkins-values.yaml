@@ -1,0 +1,11 @@
+controller:
+  installPlugins:
+    - kubernetes
+    - workflow-aggregator
+    - git
+    - configuration-as-code
+    - kubernetes-credentials-provider
+  serviceType: LoadBalancer
+persistence:
+  size: 20Gi
+  storageClass: "gp3"

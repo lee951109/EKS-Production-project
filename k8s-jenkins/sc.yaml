@@ -1,0 +1,9 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: gp3
+provisioner: ebs.csi.aws.com # 최신 CSI 드라이버로 명시
+parameters:
+  type: gp3 # gp2 보다 저렴하고 성능이 좋은 최신 규격
+reclaimPolicy: Retain
+volumeBindingMode: WaitForFirstConsumer
