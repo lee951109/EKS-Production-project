@@ -1,7 +1,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: status-checker-ingress
+  name: python-app-ingress
   annotations:
     # AWS Load Balancer Controller에게 ALB 생성 명령
     kubernetes.io/ingress.class: alb
@@ -23,7 +23,7 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: status-checker-service # 서비스 이름
+                name: python-app-service # 서비스 이름
                 port:
                   number: 80
 

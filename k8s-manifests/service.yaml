@@ -1,11 +1,11 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: status-checker-service
+  name: python-app-service
 spec:
   type: LoadBalancer # AWS ALB와 연동되어 외부 주소 생성
   selector:
-    app: status-checker
+    app: python-app
   ports:
   - protocol: TCP
     port: 80          # 외부에서 접속할 포트

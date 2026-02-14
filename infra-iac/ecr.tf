@@ -1,6 +1,6 @@
 
 resource "aws_ecr_repository" "app_repo" {
-  name = "status-checker-app"
+  name = "python-app"
   image_tag_mutability = "MUTABLE" # 같은 태그로 텊어쓰기 허용
 
   image_scanning_configuration {
@@ -9,7 +9,7 @@ resource "aws_ecr_repository" "app_repo" {
   }
   
   tags = {
-    Name = "status-checker-app"
+    Name = "python-app"
   }
 }
 
