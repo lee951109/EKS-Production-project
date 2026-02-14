@@ -61,3 +61,43 @@ resource "aws_iam_role_policy_attachment" "ecr_read_only" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
   role       = aws_iam_role.node_role.name
 }
+
+# 1. 현재 AWS 계정 ID 정보 조회
+data "aws_caller_identity" "current" {}
+
+# 2. 우리 EKS 클러스터의 정보 조회 (OIDC 주소를 알아내기 위함)
+data "aws_eks_cluster" "cluster" {
+  name = "eks-production-cluster" 
+}
+
+# ECR 접근 권한을 가진 IAM 역할 생성
+resource "aws_iam_role" "jenkins_ecr_role" {
+  name = "jenkins-ecr-push-role"
+
+  # OIDC를 통해 EKS 서비스 계정이 이 역할을 맡을 수 있도록 설정
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRoleWithWebIdentity"
+        Effect = "Allow"
+        Principal = {
+          # Federated: EKS OIDC를 신뢰 대상으로 지정
+          Federated = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:oidc-provider/${replace(data.aws_eks_cluster.cluster.identity[0].oidc[0].issuer, "https://", "")}"
+        }
+        Condition = {
+          StringEquals = {
+            # 특정 서비스 계정(SA)에게만 권한 허용 (보안의 핵심)
+            "${replace(data.aws_eks_cluster.cluster.identity[0].oidc[0].issuer, "https://", "")}:sub": "system:serviceaccount:jenkins:jenkins-admin-sa"
+          }
+        }
+      }
+    ]
+  })
+}
+
+# ECR PowerUser 정책 연결
+resource "aws_iam_role_policy_attachment" "ecr_policy" {
+  role = aws_iam_role.jenkins_ecr_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryPowerUser"
+}
