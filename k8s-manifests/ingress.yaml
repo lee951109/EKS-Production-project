@@ -2,12 +2,15 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: python-app-ingress
+  namespace: default
   annotations:
     # AWS Load Balancer Controller에게 ALB 생성 명령
     kubernetes.io/ingress.class: alb
     alb.ingress.kubernetes.io/scheme: internet-facing
     # 타겟 타입을 'ip'로 설정 (Fargate나 최근 EKS 표준)
     alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/backend-protocol: HTTP
+    alb.ingress.kubernetes.io/backend-protocol-version: HTTP1
     # ACM 인증서 ARN
     alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:ap-northeast-2:808985145578:certificate/a6fa7b8f-a325-4b93-8da4-1eae29a01523
     # HTTP 접속을 HTTPS로 자동 리다이렉트
