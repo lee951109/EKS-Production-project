@@ -25,6 +25,10 @@ spec:
         }
     }
 
+    triggers {
+        githubPush() 
+    }
+
     environment {
         AWS_ACCOUNT_ID = "808985145578"
         AWS_REGION     = "ap-northeast-2"
