@@ -20,3 +20,9 @@ spec:
         image: IMAGE_PLACEHOLDER
         ports:
         - containerPort: 8000 # 파이썬 앱(FastAPI)이 사용하는 포트
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 10

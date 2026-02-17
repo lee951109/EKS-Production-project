@@ -1,0 +1,49 @@
+# My Public IP 가져오기
+data "http" "myip" {
+  url = "http://ipv4.icanhazip.com"
+}
+
+module "eks" {
+  source  = "terraform-aws-modules/eks/aws"
+  version = "~> 20.0"
+
+  cluster_name    = "${var.project_name}-cluster"
+  cluster_version = "1.32"
+
+  # OIDC Provider 활성화 (IRSA를 위해 필수)
+  enable_irsa = true
+
+  vpc_id                   = module.vpc.vpc_id
+  subnet_ids               = module.vpc.private_subnets
+  control_plane_subnet_ids = module.vpc.private_subnets
+
+  # 클러스터 엔드포인트 설정
+  cluster_endpoint_public_access       = true
+  cluster_endpoint_public_access_cidrs = ["${chomp(data.http.myip.response_body)}/32"]
+
+  # 클러스터를 만든 IAM 사용자에게 자동으로 관리자 권한을 부여.
+  enable_cluster_creator_admin_permissions = true
+
+  # EKS Managed Node Group 설정
+  eks_managed_node_groups = {
+    main = {
+      node_group_name = "${var.project_name}-node-group"
+      instance_types  = ["t3.medium"]
+
+      min_size     = 1
+      max_size     = 3
+      desired_size = 2
+
+      # 필요한 정책 추가
+      iam_role_additional_policies = {
+        AmazonEC2ContainerRegistryReadOnly = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+        AmazonEKS_CNI_Policy               = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
+        AmazonEKSWorkerNodePolicy          = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
+      }
+    }
+  }
+
+  tags = {
+    Name = "${var.project_name}-cluster"
+  }
+}

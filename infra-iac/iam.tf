@@ -65,16 +65,10 @@ resource "aws_iam_role_policy_attachment" "ecr_read_only" {
 # 1. 현재 AWS 계정 ID 정보 조회
 data "aws_caller_identity" "current" {}
 
-# 2. 우리 EKS 클러스터의 정보 조회 (OIDC 주소를 알아내기 위함)
-data "aws_eks_cluster" "cluster" {
-  name = "eks-production-cluster" 
-}
-
 # ECR 접근 권한을 가진 IAM 역할 생성
 resource "aws_iam_role" "jenkins_ecr_role" {
   name = "jenkins-ecr-push-role"
 
-  # OIDC를 통해 EKS 서비스 계정이 이 역할을 맡을 수 있도록 설정
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -82,13 +76,13 @@ resource "aws_iam_role" "jenkins_ecr_role" {
         Action = "sts:AssumeRoleWithWebIdentity"
         Effect = "Allow"
         Principal = {
-          # Federated: EKS OIDC를 신뢰 대상으로 지정
-          Federated = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:oidc-provider/${replace(data.aws_eks_cluster.cluster.identity[0].oidc[0].issuer, "https://", "")}"
+          # 모듈의 출력값을 참조하여 의존성 해결
+          Federated = module.eks.oidc_provider_arn
         }
         Condition = {
           StringEquals = {
-            # 특정 서비스 계정(SA)에게만 권한 허용 (보안의 핵심)
-            "${replace(data.aws_eks_cluster.cluster.identity[0].oidc[0].issuer, "https://", "")}:sub": "system:serviceaccount:jenkins:jenkins-admin-sa"
+            # 공식 모듈 출력값은 https:// 가 이미 제거되어 있음
+            "${module.eks.oidc_provider}:sub" : "system:serviceaccount:jenkins:jenkins-admin-sa"
           }
         }
       }
@@ -98,6 +92,45 @@ resource "aws_iam_role" "jenkins_ecr_role" {
 
 # ECR PowerUser 정책 연결
 resource "aws_iam_role_policy_attachment" "ecr_policy" {
-  role = aws_iam_role.jenkins_ecr_role.name
+  role       = aws_iam_role.jenkins_ecr_role.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryPowerUser"
+}
+
+# 로드밸런서 컨트롤러를 위한 IAM 정책 가져오기
+resource "aws_iam_policy" "lbc_policy" {
+  name        = "AWSLoadBalancerControllerIAMPolicy"
+  description = "Permissions for AWS Load Balancer Controller"
+  policy      = file("${path.module}/policies/iam_policy.json")
+}
+
+# 로드밸런서 컨트롤러용 IAM 역할 생성
+resource "aws_iam_role" "lbc_role" {
+  name = "aws-load-balancer-controller-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRoleWithWebIdentity"
+        Effect = "Allow"
+        Principal = {
+          # EKS 모듈 OIDC 참조
+          Federated = module.eks.oidc_provider_arn
+        }
+        Condition = {
+          StringEquals = {
+            # OIDC URL에서 https://를 제거한 값 뒤에 서브넷 붙이기
+            "${module.eks.oidc_provider}:sub" : "system:serviceaccount:kube-system:aws-load-balancer-controller",
+            "${module.eks.oidc_provider}:aud" : "sts.amazonaws.com"
+          }
+        }
+      }
+    ]
+  })
+}
+
+# 역할과 정책 연결
+resource "aws_iam_role_policy_attachment" "lbc_attach" {
+  role       = aws_iam_role.lbc_role.name
+  policy_arn = aws_iam_policy.lbc_policy.arn
 }

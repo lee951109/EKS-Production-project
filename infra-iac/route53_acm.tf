@@ -5,7 +5,7 @@ resource "aws_route53_zone" "main" {
 
 # 2. ACM 인증서 신청
 resource "aws_acm_certificate" "cert" {
-  domain_name = "fastcampus-jihyun.link"
+  domain_name       = "fastcampus-jihyun.link"
   validation_method = "DNS"
 
   subject_alternative_names = ["*.fastcampus-jihyun.link"]
