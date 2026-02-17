@@ -15,7 +15,7 @@ spec:
     - name: kaniko-secret
       mountPath: /kaniko/.docker
   - name: kubectl
-    image: bitnami/kubectl:latest
+    image: alpine/k8s:1.29.2
     command: ['sleep']
     args: ['infinity']
   volumes:
