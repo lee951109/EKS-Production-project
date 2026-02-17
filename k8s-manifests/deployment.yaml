@@ -17,7 +17,6 @@ spec:
     spec:
       containers:
       - name: python-app
-        image: 808985145578.dkr.ecr.ap-northeast-2.amazonaws.com/python-app:v1
-        ports:
+        image: IMAGE_PLACEHOLDER
         ports:
         - containerPort: 8000 # 파이썬 앱(FastAPI)이 사용하는 포트
