@@ -13,7 +13,7 @@ def read_root():
     now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     return {
-        "message": "Cloud-Native Status Checker is Running - Version 2",
+        "message": "Cloud-Native Status Checker is Running via Github Webhook",
         "pod_name": pod_name,
         "timestamp": now,
         "status": "Healthy"
