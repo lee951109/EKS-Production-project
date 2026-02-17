@@ -41,8 +41,9 @@ spec:
                 container('kaniko') {
                     // Dockerfile기반으로 빌드 및 푸시를 수행.
                     sh """
-                    /kaniko/executor --context `pwd` \
-                        --dockerfile Dockerfile \
+                    /kaniko/executor \ 
+                        --context ${WORKSPACE}/status-checker-app \
+                        --dockerfile ${WORKSPACE}/status-checker-app/Dockerfile \
                         --destination ${ECR_URL}/${ECR_REPO_NAME}:${IMAGE_TAG} \
                         --destination ${ECR_URL}/${ECR_REPO_NAME}:latest
                     """
