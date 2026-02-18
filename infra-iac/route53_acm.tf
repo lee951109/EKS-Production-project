@@ -1,6 +1,7 @@
 # 1. Route 53 호스팅 영역 (도메인 관리소)
-resource "aws_route53_zone" "main" {
-  name = "fastcampus-jihyun.link"
+data "aws_route53_zone" "selected" {
+  name         = "fastcampus-jihyun.link"
+  private_zone = false
 }
 
 # 2. ACM 인증서 신청
@@ -36,5 +37,5 @@ resource "aws_route53_record" "cert_validation" {
   records         = [each.value.record]
   ttl             = 60
   type            = each.value.type
-  zone_id         = aws_route53_zone.main.zone_id
+  zone_id         = data.aws_route53_zone.selected.zone_id
 }

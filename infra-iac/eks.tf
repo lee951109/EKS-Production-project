@@ -17,6 +17,13 @@ module "eks" {
   subnet_ids               = module.vpc.private_subnets
   control_plane_subnet_ids = module.vpc.private_subnets
 
+  # EBS CSI 드라이버 애드온 설정
+  cluster_addons = {
+    aws-ebs-csi-driver = {
+      service_account_role_arn = aws_iam_role.ebs_csi_role.arn 
+    }
+  }
+
   # 클러스터 엔드포인트 설정
   cluster_endpoint_public_access       = true
   cluster_endpoint_public_access_cidrs = ["${chomp(data.http.myip.response_body)}/32"]
@@ -42,6 +49,7 @@ module "eks" {
       }
     }
   }
+
 
   tags = {
     Name = "${var.project_name}-cluster"

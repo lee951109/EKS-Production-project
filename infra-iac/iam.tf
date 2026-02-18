@@ -134,3 +134,33 @@ resource "aws_iam_role_policy_attachment" "lbc_attach" {
   role       = aws_iam_role.lbc_role.name
   policy_arn = aws_iam_policy.lbc_policy.arn
 }
+
+# EBS CSI 드라이버용 IAM 역할 생성
+resource "aws_iam_role" "ebs_csi_role" {
+  name = "${var.project_name}-ebs-csi-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRoleWithWebIdentity"
+        Effect = "Allow"
+        Principal = {
+          Federated = module.eks.oidc_provider_arn
+        }
+        Condition = {
+          StringEquals = {
+            "${module.eks.oidc_provider}:sub" : "system:serviceaccount:kube-system:ebs-csi-controller-sa"
+          }
+        }
+      }
+    ]
+  })
+}
+
+# EBS CSI 필수 정책 연결
+resource "aws_iam_role_policy_attachment" "ebs_csi_attach" {
+  role       = aws_iam_role.ebs_csi_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
+}
+
