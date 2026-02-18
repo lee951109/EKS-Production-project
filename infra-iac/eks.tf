@@ -55,3 +55,44 @@ module "eks" {
     Name = "${var.project_name}-cluster"
   }
 }
+
+
+# AWS Load Balancer Controller 설치
+resource "helm_release" "aws_lbc" {
+  name       = "aws-load-balancer-controller"
+  repository = "https://aws.github.io/eks-charts"
+  chart      = "aws-load-balancer-controller"
+  namespace  = "kube-system"
+  version    = "1.7.1" # 안정적인 버전
+
+  set {
+    name  = "clusterName"
+    value = module.eks.cluster_name
+  }
+
+  set {
+    name  = "serviceAccount.create"
+    value = "true"
+  }
+
+  set {
+    name  = "serviceAccount.name"
+    value = "aws-load-balancer-controller"
+  }
+
+  set {
+    name  = "vpcId"
+    value = module.vpc.vpc_id
+  }
+
+  set {
+    name  = "region"
+    value = var.region
+  }
+
+  # iam.tf에서 만든 lbc_role의 ARN을 자동으로 조회
+  set {
+    name  = "serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn"
+    value = aws_iam_role.lbc_role.arn
+  }
+}
