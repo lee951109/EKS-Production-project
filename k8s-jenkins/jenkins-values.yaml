@@ -5,6 +5,7 @@ controller:
     - git
     - configuration-as-code
     - kubernetes-credentials-provider
+    - github
   serviceType: LoadBalancer
 persistence:
   size: 20Gi
