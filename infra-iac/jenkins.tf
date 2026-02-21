@@ -27,7 +27,7 @@ resource "helm_release" "jenkins" {
   values = [
     yamlencode({
       controller = {
-        adminPassword = "admin" # 비밀번호 
+        adminPassword = var.jenkins_admin_password # 비밀번호 
         
         installPlugins = [
           "kubernetes",
@@ -49,7 +49,7 @@ resource "helm_release" "jenkins" {
             "alb.ingress.kubernetes.io/scheme" = "internet-facing"
             "alb.ingress.kubernetes.io/target-type" = "ip"
             "alb.ingress.kubernetes.io/backend-protocol-version" = "HTTP1"
-            "alb.ingress.kubernetes.io/certificate-arn" = "arn:aws:acm:ap-northeast-2:808985145578:certificate/a6fa7b8f-a325-4b93-8da4-1eae29a01523"
+            "alb.ingress.kubernetes.io/certificate-arn" = aws_acm_certificate.cert.arn
             "alb.ingress.kubernetes.io/listen-ports" = "[{\"HTTP\": 80}, {\"HTTPS\": 443}]"
             "alb.ingress.kubernetes.io/actions.ssl-redirect" = "{\"Type\": \"redirect\", \"RedirectConfig\": { \"Protocol\": \"HTTPS\", \"Port\": \"443\", \"StatusCode\": \"HTTP_301\"}}"
           }
@@ -61,7 +61,7 @@ resource "helm_release" "jenkins" {
           create = true
           name   = "jenkins-admin-sa"
           annotations = {
-            "eks.amazonaws.com/role-arn" = "arn:aws:iam::808985145578:role/jenkins-ecr-push-role"
+            "eks.amazonaws.com/role-arn" = aws_iam_role.jenkins_ecr_role.arn
           }
         }
       }

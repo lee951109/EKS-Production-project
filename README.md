@@ -125,3 +125,9 @@ graph TD
 - **Security**: HashiCorp Vault를 연동한 시크릿 관리 고도화.
 - **GitOps**: ArgoCD를 도입하여 선언적 배포 프로세스 구축.
 
+---
+
+## Ahthor
+- **Name**: 이지현
+- **Role**: DevOps Engineer / Full Stack Developer
+- **Contact**: [GitHub Link](https://github.com/lee951109), [Blog](https://velog.io/@lee951109/posts)
