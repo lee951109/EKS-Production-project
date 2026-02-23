@@ -18,6 +18,6 @@ variable "vpc_cidr" {
 
 variable "jenkins_admin_password" {
   description = "Jenkins 초기 관리자 패스워드"
-  type = string
-  sensitive = true 
+  type        = string
+  sensitive   = true
 }

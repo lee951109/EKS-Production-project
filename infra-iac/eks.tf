@@ -20,7 +20,7 @@ module "eks" {
   # EBS CSI 드라이버 애드온 설정
   cluster_addons = {
     aws-ebs-csi-driver = {
-      service_account_role_arn = aws_iam_role.ebs_csi_role.arn 
+      service_account_role_arn = aws_iam_role.ebs_csi_role.arn
     }
   }
 

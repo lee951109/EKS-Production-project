@@ -21,14 +21,21 @@ resource "helm_release" "jenkins" {
   repository       = "https://charts.jenkins.io"
   chart            = "jenkins"
   namespace        = "jenkins" # [수정] 리소스 참조 대신 직접 입력
-  create_namespace = true      # [추가] 헬름아, 방(네임스페이스) 없으면 네가 만들어라!
+  create_namespace = true      # 네임스페이스 생성
   version          = "5.1.4"
 
   values = [
     yamlencode({
       controller = {
-        adminPassword = var.jenkins_admin_password # 비밀번호 
-        
+
+        image = {
+          tag = "lts-jdk17"
+        }
+
+        admin = {
+          password = var.jenkins_admin_password # 비밀번호 
+        }
+
         installPlugins = [
           "kubernetes",
           "workflow-aggregator",
@@ -37,25 +44,25 @@ resource "helm_release" "jenkins" {
           "github",
           "kubernetes-credentials-provider"
         ]
-        
+
         serviceType = "ClusterIP"
 
         # 인그레스 설정
         ingress = {
-          enabled = true
-          apiVersion = "networking.k8s.io/v1"
+          enabled          = true
+          apiVersion       = "networking.k8s.io/v1"
           ingressClassName = "alb"
           annotations = {
-            "alb.ingress.kubernetes.io/scheme" = "internet-facing"
-            "alb.ingress.kubernetes.io/target-type" = "ip"
+            "alb.ingress.kubernetes.io/scheme"                   = "internet-facing"
+            "alb.ingress.kubernetes.io/target-type"              = "ip"
             "alb.ingress.kubernetes.io/backend-protocol-version" = "HTTP1"
-            "alb.ingress.kubernetes.io/certificate-arn" = aws_acm_certificate.cert.arn
-            "alb.ingress.kubernetes.io/listen-ports" = "[{\"HTTP\": 80}, {\"HTTPS\": 443}]"
-            "alb.ingress.kubernetes.io/actions.ssl-redirect" = "{\"Type\": \"redirect\", \"RedirectConfig\": { \"Protocol\": \"HTTPS\", \"Port\": \"443\", \"StatusCode\": \"HTTP_301\"}}"
+            "alb.ingress.kubernetes.io/certificate-arn"          = aws_acm_certificate.cert.arn
+            "alb.ingress.kubernetes.io/listen-ports"             = "[{\"HTTP\": 80}, {\"HTTPS\": 443}]"
+            "alb.ingress.kubernetes.io/actions.ssl-redirect"     = "{\"Type\": \"redirect\", \"RedirectConfig\": { \"Protocol\": \"HTTPS\", \"Port\": \"443\", \"StatusCode\": \"HTTP_301\"}}"
           }
           hostName = "jenkins.fastcampus-jihyun.link"
         }
-        
+
         # 서비스 어카운트 (IAM 역할 연결)
         serviceAccount = {
           create = true
@@ -73,7 +80,7 @@ resource "helm_release" "jenkins" {
       }
     })
   ]
-  
+
   # 스토리지 클래스가 먼저 만들어져야 함
   depends_on = [kubernetes_storage_class.gp3]
 }
