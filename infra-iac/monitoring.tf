@@ -25,7 +25,7 @@ resource "helm_release" "prometheus_stack" {
   }
 
   # AWS LBC가 완전히 설치된 후에만 프로메테우스를 설치하도록 강제
-  depends_on = [ helm_release.aws_lbc ]
+  depends_on = [helm_release.aws_lbc]
 
   # 그라파나 설정 및 도메인 연결 (Ingress)
   values = [
@@ -57,12 +57,12 @@ resource "helm_release" "prometheus_stack" {
 
 # 로그 수집 및 저장 시스템 (Loki + Promtail)
 resource "helm_release" "loki" {
-  name             = "loki"
-  repository       = "https://grafana.github.io/helm-charts"
-  chart            = "loki-stack"
-  
-  namespace        = kubernetes_namespace.monitoring.metadata[0].name
-  version          = "2.9.11"
+  name       = "loki"
+  repository = "https://grafana.github.io/helm-charts"
+  chart      = "loki-stack"
+
+  namespace = kubernetes_namespace.monitoring.metadata[0].name
+  version   = "2.9.11"
 
   values = [
     yamlencode({
